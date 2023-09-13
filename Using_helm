@@ -1,0 +1,62 @@
+Steps to Install Prometheus:
+--------------------------------
+
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+best - helm install my-grafana prometheus-community/kube-prometheus-stack 
+or
+helm install prometheus prometheus-community/prometheus
+
+##### To check the k8s service
+
+kubectl get svc 
+
+default the service is set into the "ClusterIP" , To Expose Outside World - Need to Change to "NodePort"
+
+steps:
+
+kubectl expose service prometheus-server --type=NodePort --target-port=9090 --name=prometheus-server-ext
+
+or 
+
+kubectl get svc my-grafana-kube-prometheus-prometheus --output yaml>prometheus.yaml
+
+vi Prometheus.yaml - change the port from ClusterIP to NodePort
+
+Kubectl apply -f prometheus.yaml
+
+### To Verify
+
+kubectl get svc
+
+Grafana
+--------------------
+helm repo add grafana https://grafana.github.io/helm-charts
+helm repo update
+helm install grafana stable/grafana 
+or 
+best - helm install my-grafana prometheus-community/kube-prometheus-stack
+
+##### To check the k8s service
+
+kubectl get svc 
+
+default the service is set into the "ClusterIP" , To Expose Outside World - Need to Change to "NodePort"
+
+kubectl get svc my-grafana-kube-prometheus-prometheus --output yaml>my-grafana.yaml
+vi my-grafana.yaml - change the port from ClusterIP to NodePort
+kubectl apply -f my-grafana.yaml
+
+###Password
+kubectl exec -it -n <namespace> <pod-name> -- /bin/bash
+Ex: kubectl get secret --namespace metrics my-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+
+Nord Exporter
+-----------
+Helpful to get information of Nodes.
+
+Grafana > Import dashboard > Import via grafana.com > ID - 1860 > select Data Source "Prometheus"
+
+----------------------------------------------------------
+
+Dashboards: https://grafana.com/grafana/dashboards/6417
